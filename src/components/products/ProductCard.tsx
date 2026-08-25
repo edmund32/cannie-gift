@@ -1,4 +1,5 @@
 import type { Product } from "@/types/product";
+import Link from "next/link";
 
 type ProductCardProps = {
   product: Product;
@@ -32,12 +33,12 @@ export default function ProductCard({
           Rp {product.price.toLocaleString("id-ID")}
         </p>
 
-        <button
-          type="button"
-          className="mt-4 w-full rounded-lg bg-black px-4 py-2 text-white transition hover:opacity-80"
+        <Link
+          href={`/products/${product.id}`}
+          className="mt-4 block w-full rounded-lg bg-black px-4 py-2 text-center text-white transition hover:opacity-80"
         >
           Lihat Produk
-        </button>
+        </Link>
       </div>
     </article>
   );

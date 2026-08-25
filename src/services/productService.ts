@@ -16,3 +16,23 @@ export async function getProducts(): Promise<Product[]> {
 
   return data ?? [];
 }
+
+// Mengambil satu produk berdasarkan ID.
+export async function getProductById(id: string): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  // Kalau produk tidak ditemukan, kembalikan null.
+  if (error) {
+    if (error.code === "PGRST116") {
+      return null;
+    }
+
+    throw new Error(error.message);
+  }
+
+  return data;
+}

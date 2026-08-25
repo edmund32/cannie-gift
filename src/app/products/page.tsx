@@ -1,8 +1,13 @@
-import ProductCard from "@/components/products/ProductCard";
-import { getProducts } from "@/services/productService";
+import ProductCatalog from "../../components/products/ProductCatalog";
+import { getCategories } from "../../services/categoryService";
+import { getProducts } from "../../services/productService";
 
 export default async function ProductsPage() {
-  const products = await getProducts();
+  // Mengambil products dan categories dari Supabase secara bersamaan.
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
@@ -16,20 +21,10 @@ export default async function ProductsPage() {
         </p>
       </div>
 
-      {products.length === 0 ? (
-        <p className="text-gray-500">
-          Belum ada produk yang tersedia.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
-          ))}
-        </div>
-      )}
+      <ProductCatalog
+        products={products}
+        categories={categories}
+      />
     </main>
   );
 }
