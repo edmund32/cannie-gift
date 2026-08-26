@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  getCustomerByUserId,
+  createCustomerProfile,
+} from "../../services/customerService";
 import { FormEvent, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
@@ -11,26 +15,67 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  event.preventDefault();
 
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    // Login menggunakan email dan password Supabase Auth.
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  // Login ke Supabase Auth.
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
+  if (error) {
+    setError(error.message);
+    setLoading(false);
+    return;
+  }
+
+  const user = data.user;
+
+  if (!user) {
+    setError("User tidak ditemukan.");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    // Cek apakah customer profile sudah ada.
+    const existingCustomer = await getCustomerByUserId(user.id);
+
+    // Kalau belum ada, buat customer baru.
+    if (!existingCustomer) {
+      const name = user.user_metadata?.name;
+      const phone = user.user_metadata?.phone;
+      const address = user.user_metadata?.address;
+
+      if (!name || !phone) {
+        setError("Data customer tidak lengkap.");
+        setLoading(false);
+        return;
+      }
+
+      await createCustomerProfile(user.id, {
+        name,
+        phone,
+        email: user.email,
+        address,
+      });
     }
 
-    // Login berhasil, arahkan ke halaman products.
+    // Customer sudah ada atau berhasil dibuat.
     window.location.href = "/products";
+  } catch (customerError) {
+    setError(
+      customerError instanceof Error
+        ? customerError.message
+        : "Gagal membuat customer profile."
+    );
+
+    setLoading(false);
   }
+}
 
   return (
     <main className="mx-auto max-w-md px-6 py-10">

@@ -7,7 +7,22 @@ type CustomerData = {
   address?: string;
 };
 
-// Membuat profile customer berdasarkan user Auth yang sedang login.
+// Mengambil customer berdasarkan user_id dari Supabase Auth.
+export async function getCustomerByUserId(userId: string) {
+  const { data, error } = await supabase
+    .from("customers")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// Membuat customer profile baru.
 export async function createCustomerProfile(
   userId: string,
   customerData: CustomerData
