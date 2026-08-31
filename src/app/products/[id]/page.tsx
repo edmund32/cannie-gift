@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProductById } from "../../../services/productService";
+import AddToCartButton from "../../../components/products/AddToCartButton";
 
 type ProductDetailPageProps = {
   params: Promise<{
@@ -59,12 +60,7 @@ export default async function ProductDetailPage({
             Rp {product.price.toLocaleString("id-ID")}
           </p>
 
-          <button
-            type="button"
-            className="mt-8 rounded-lg bg-black px-6 py-3 text-white transition hover:opacity-80"
-          >
-            Tambah ke Keranjang
-          </button>
+          <AddToCartButton productId={product.id} />
         </div>
       </div>
     </main>
