@@ -1,5 +1,22 @@
 import { supabase } from "@/lib/supabase";
 
+type CartProduct = {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string;
+};
+
+type CartItemWithProduct = {
+  id: string;
+  cart_id: string;
+  product_id: string | null;
+  custom_bouquet_id: string | null;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
+  products: CartProduct | null;
+};
 /**
  * Mengambil cart milik customer.
  * Kalau belum punya cart, buat cart baru.
@@ -110,7 +127,6 @@ export async function addToCart(
  * di setiap cart item.
  */
 export async function getCartItems(customerId: string) {
-  // Cari cart milik customer.
   const { data: cart, error: cartError } = await supabase
     .from("carts")
     .select("id")
@@ -121,14 +137,10 @@ export async function getCartItems(customerId: string) {
     throw new Error(cartError.message);
   }
 
-  // Kalau customer belum punya cart,
-  // berarti cart masih kosong.
   if (!cart) {
     return [];
   }
 
-  // Ambil item dari cart tersebut.
-  // Sekaligus ambil informasi produknya.
   const { data, error } = await supabase
     .from("cart_items")
     .select(`
@@ -153,5 +165,36 @@ export async function getCartItems(customerId: string) {
     throw new Error(error.message);
   }
 
-  return data ?? [];
+  console.log("Cart items:", data);
+
+  return (data ?? []) as unknown as CartItemWithProduct[];
+}
+
+/**
+ * Mengubah quantity sebuah cart item.
+ */
+export async function updateCartItemQuantity(
+  cartItemId: string,
+  quantity: number
+) {
+  // Kalau quantity kurang dari 1,
+  // item tidak boleh disimpan dengan quantity 0.
+  if (quantity < 1) {
+    throw new Error("Quantity minimal adalah 1.");
+  }
+
+  const { data, error } = await supabase
+    .from("cart_items")
+    .update({
+      quantity,
+    })
+    .eq("id", cartItemId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
 }
