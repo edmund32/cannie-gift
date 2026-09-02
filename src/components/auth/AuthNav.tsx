@@ -3,15 +3,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
 export default function AuthNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
+  const isAuthPage = pathname === "/login" || pathname === "/register";
 
   useEffect(() => {
     let mounted = true;
@@ -74,9 +76,11 @@ export default function AuthNav() {
               Keranjang
             </Link>
 
-            <span className="hidden text-sm text-gray-600 sm:inline">
-              {user.email}
-            </span>
+            {!isAuthPage && (
+              <span className="hidden text-sm text-gray-600 sm:inline">
+                {user.email}
+              </span>
+            )}
 
             <button
               type="button"
