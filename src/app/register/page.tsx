@@ -161,7 +161,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-black px-6 py-3 text-white transition hover:opacity-80 disabled:opacity-50"
+          className="w-full rounded-lg bg-[#003f52] px-6 py-3 text-white transition hover:bg-[#00566d] disabled:opacity-50"
         >
           {loading ? "Mendaftarkan..." : "Register"}
         </button>

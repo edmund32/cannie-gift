@@ -10,21 +10,38 @@ export default async function ProductsPage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">
-          Our Products
-        </h1>
+    <main className="min-h-screen bg-[#fffaf0]">
+      <div className="mx-auto max-w-7xl px-6 py-10 sm:py-14">
+        <section className="mb-12 rounded-3xl bg-[#003f52] px-6 py-10 text-white sm:px-12">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#d4af37]">
+            Hadiah penuh makna
+          </p>
+          <h1 className="mt-3 max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
+            Temukan hadiah manis untuk orang tersayang.
+          </h1>
+          <p className="mt-4 max-w-xl text-white/75">
+            Pilih bouquet pilihan kami untuk membuat momen spesial terasa lebih
+            berkesan.
+          </p>
+        </section>
 
-        <p className="mt-2 text-gray-600">
-          Pilih bouquet yang cocok untuk kamu.
-        </p>
+        <div className="mb-7 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-[#9b7b12]">Koleksi kami</p>
+            <h2 className="mt-1 text-2xl font-bold text-gray-900">
+              Pilihan bouquet
+            </h2>
+          </div>
+          <p className="hidden text-sm text-gray-500 sm:block">
+            Dibuat dengan penuh perhatian
+          </p>
+        </div>
+
+        <ProductCatalog
+          products={products}
+          categories={categories}
+        />
       </div>
-
-      <ProductCatalog
-        products={products}
-        categories={categories}
-      />
     </main>
   );
 }

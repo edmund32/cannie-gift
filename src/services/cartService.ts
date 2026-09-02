@@ -198,3 +198,17 @@ export async function updateCartItemQuantity(
 
   return data;
 }
+
+/**
+ * Menghapus sebuah item dari cart.
+ */
+export async function removeCartItem(cartItemId: string) {
+  const { error } = await supabase
+    .from("cart_items")
+    .delete()
+    .eq("id", cartItemId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}

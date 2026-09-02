@@ -5,13 +5,30 @@ import { useEffect, useState } from "react";
 
 import { supabase } from "../../lib/supabase";
 import { getCustomerByUserId } from "../../services/customerService";
+import { getProductById } from "../../services/productService";
 import {
   getCartItems,
+  removeCartItem,
   updateCartItemQuantity,
 } from "../../services/cartService";
+import {
+  getGuestCart,
+  removeGuestCartItem,
+  updateGuestCartItem,
+} from "../../services/guestCartService";
+
+type CartDisplayItem = {
+  id: string;
+  quantity: number;
+  products: {
+    name: string;
+    price: number;
+    image_url?: string;
+  } | null;
+};
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [cartItems, setCartItems] = useState<CartDisplayItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,7 +40,18 @@ export default function CartPage() {
         } = await supabase.auth.getUser();
 
         if (!user) {
-          window.location.href = "/login";
+          const guestItems = getGuestCart();
+          const guestProducts = await Promise.all(
+            guestItems.map(async (guestItem) => ({
+              id: guestItem.productId,
+              quantity: guestItem.quantity,
+              products: await getProductById(guestItem.productId),
+            }))
+          );
+
+          setCartItems(
+            guestProducts.filter((item) => item.products !== null)
+          );
           return;
         }
 
@@ -54,17 +82,23 @@ export default function CartPage() {
   newQuantity: number
 ) {
   try {
-    await updateCartItemQuantity(cartItemId, newQuantity);
-
-    // Ambil ulang cart setelah quantity berubah.
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) {
-      window.location.href = "/login";
+      updateGuestCartItem(cartItemId, newQuantity);
+      setCartItems((currentItems) =>
+        currentItems.map((item) =>
+          item.id === cartItemId
+            ? { ...item, quantity: newQuantity }
+            : item
+        )
+      );
       return;
     }
+
+    await updateCartItemQuantity(cartItemId, newQuantity);
 
     const customer = await getCustomerByUserId(user.id);
 
@@ -80,6 +114,33 @@ export default function CartPage() {
   }
 }
 
+  async function handleRemoveItem(cartItemId: string) {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        removeGuestCartItem(cartItemId);
+        setCartItems((currentItems) =>
+          currentItems.filter((item) => item.id !== cartItemId)
+        );
+        return;
+      }
+
+      await removeCartItem(cartItemId);
+      setCartItems((currentItems) =>
+        currentItems.filter((item) => item.id !== cartItemId)
+      );
+    } catch (error) {
+      console.error("Gagal menghapus item:", error);
+    }
+  }
+
+  const totalPrice = cartItems.reduce((total, item) => {
+    return total + (item.products?.price ?? 0) * item.quantity;
+  }, 0);
+
   if (loading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-10">
@@ -94,7 +155,7 @@ export default function CartPage() {
       <div className="mb-8">
         <Link
           href="/products"
-          className="text-sm text-gray-600 hover:text-black"
+            className="text-sm text-gray-600 hover:text-[#003f52]"
         >
           ← Kembali ke Produk
         </Link>
@@ -113,7 +174,7 @@ export default function CartPage() {
 
           <Link
             href="/products"
-            className="mt-4 inline-block rounded-lg bg-black px-6 py-3 text-white hover:opacity-80"
+            className="mt-4 inline-block rounded-lg bg-[#003f52] px-6 py-3 text-white hover:bg-[#00566d]"
           >
             Mulai Belanja
           </Link>
@@ -134,6 +195,13 @@ export default function CartPage() {
                 <p className="mt-1 text-gray-600">
                   Rp{" "}
                   {item.products?.price?.toLocaleString("id-ID")}
+                </p>
+
+                <p className="mt-1 font-medium">
+                  Subtotal: Rp{" "}
+                  {((item.products?.price ?? 0) * item.quantity).toLocaleString(
+                    "id-ID"
+                  )}
                 </p>
 
                 <div className="mt-3 flex items-center gap-3">
@@ -162,9 +230,23 @@ export default function CartPage() {
                     +
                   </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleRemoveItem(item.id)}
+                  className="mt-3 text-sm text-red-600 hover:text-red-800"
+                >
+                  Hapus
+                </button>
               </div>
             </div>
           ))}
+
+          <div className="rounded-xl border bg-gray-50 p-4 text-right">
+            <p className="text-lg font-bold">
+              Total: Rp {totalPrice.toLocaleString("id-ID")}
+            </p>
+          </div>
         </div>
       )}
     </main>

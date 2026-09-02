@@ -31,11 +31,15 @@ export default function ProductCatalog({
   return (
     <div>
       {/* Tombol filter kategori */}
-      <div className="mb-8 flex flex-wrap gap-3">
+      <div className="mb-8 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => setSelectedCategory(null)}
-          className="rounded-lg bg-black px-4 py-2 text-white"
+          className={`rounded-full px-4 py-2 text-sm transition ${
+            selectedCategory === null
+              ? "bg-[#003f52] text-white hover:-translate-y-0.5 hover:bg-[#00566d] hover:shadow-md"
+              : "border border-[#d4af37]/50 bg-white text-gray-700 hover:-translate-y-0.5 hover:border-[#d4af37] hover:bg-[#fffaf0] hover:shadow-md"
+          }`}
         >
           All
         </button>
@@ -45,7 +49,11 @@ export default function ProductCatalog({
             key={category.id}
             type="button"
             onClick={() => setSelectedCategory(category.id)}
-            className="rounded-lg border px-4 py-2"
+            className={`rounded-full px-4 py-2 text-sm transition ${
+              selectedCategory === category.id
+                ? "bg-[#003f52] text-white hover:-translate-y-0.5 hover:bg-[#00566d] hover:shadow-md"
+                : "border border-[#d4af37]/50 bg-white text-gray-700 hover:-translate-y-0.5 hover:border-[#d4af37] hover:bg-[#fffaf0] hover:shadow-md"
+            }`}
           >
             {category.name}
           </button>

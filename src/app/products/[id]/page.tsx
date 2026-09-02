@@ -29,7 +29,7 @@ export default async function ProductDetailPage({
       {/* Tombol kembali ke katalog */}
       <Link
         href="/products"
-        className="mb-6 inline-block text-sm text-gray-600 hover:text-black"
+        className="mb-6 inline-block text-sm text-gray-600 hover:text-[#003f52]"
       >
         ← Kembali ke Produk
       </Link>

@@ -1,13 +1,11 @@
 "use client";
 
-import {
-  getCustomerByUserId,
-  createCustomerProfile,
-} from "../../services/customerService";
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -40,41 +38,9 @@ export default function LoginPage() {
     return;
   }
 
-  try {
-    // Cek apakah customer profile sudah ada.
-    const existingCustomer = await getCustomerByUserId(user.id);
-
-    // Kalau belum ada, buat customer baru.
-    if (!existingCustomer) {
-      const name = user.user_metadata?.name;
-      const phone = user.user_metadata?.phone;
-      const address = user.user_metadata?.address;
-
-      if (!name || !phone) {
-        setError("Data customer tidak lengkap.");
-        setLoading(false);
-        return;
-      }
-
-      await createCustomerProfile(user.id, {
-        name,
-        phone,
-        email: user.email,
-        address,
-      });
-    }
-
-    // Customer sudah ada atau berhasil dibuat.
-    window.location.href = "/products";
-  } catch (customerError) {
-    setError(
-      customerError instanceof Error
-        ? customerError.message
-        : "Gagal membuat customer profile."
-    );
-
-    setLoading(false);
-  }
+  // Login berhasil. Langsung arahkan user ke halaman produk.
+  // Pengecekan atau pembuatan customer profile tidak boleh menghalangi login.
+  router.replace("/products");
 }
 
   return (
@@ -133,7 +99,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-black px-6 py-3 text-white transition hover:opacity-80 disabled:opacity-50"
+          className="w-full rounded-lg bg-[#003f52] px-6 py-3 text-white transition hover:bg-[#00566d] disabled:opacity-50"
         >
           {loading ? "Login..." : "Login"}
         </button>

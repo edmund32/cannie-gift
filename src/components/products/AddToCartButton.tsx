@@ -4,6 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { getCustomerByUserId } from "@/services/customerService";
 import { addToCart } from "@/services/cartService";
+import { addGuestCartItem } from "@/services/guestCartService";
 
 type AddToCartButtonProps = {
   productId: string;
@@ -24,7 +25,8 @@ export default function AddToCartButton({
       } = await supabase.auth.getUser();
 
       if (!user) {
-        alert("Silakan login terlebih dahulu.");
+        addGuestCartItem(productId);
+        alert("Produk berhasil ditambahkan ke keranjang!");
         return;
       }
 
@@ -53,7 +55,7 @@ export default function AddToCartButton({
       type="button"
       onClick={handleAddToCart}
       disabled={loading}
-      className="mt-8 rounded-lg bg-black px-6 py-3 text-white transition hover:opacity-80 disabled:opacity-50"
+      className="mt-8 rounded-lg bg-[#003f52] px-6 py-3 text-white transition hover:bg-[#00566d] disabled:opacity-50"
     >
       {loading ? "Menambahkan..." : "Tambah ke Keranjang"}
     </button>
