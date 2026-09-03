@@ -4,6 +4,9 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
+import { getOrCreateCustomerProfile } from "../../services/customerService";
+import { mergeGuestCart } from "../../services/cartService";
+import { clearGuestCart, getGuestCart } from "../../services/guestCartService";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,7 +53,26 @@ export default function LoginPage() {
       return;
     }
 
+    try {
+      const customer = await getOrCreateCustomerProfile(user);
+      const guestItems = getGuestCart();
+
+      if (guestItems.length > 0) {
+        await mergeGuestCart(customer.id, guestItems);
+        clearGuestCart();
+      }
+    } catch (profileError) {
+      console.error("Gagal menyiapkan customer profile:", profileError);
+      setError("Login berhasil, tetapi profil customer belum dapat disiapkan.");
+      setLoading(false);
+      return;
+    }
+
     // Login berhasil. Langsung arahkan user ke halaman produk.
+    router.replace("/products");
+  }
+
+  function handleGuestLogin() {
     router.replace("/products");
   }
 
@@ -137,6 +159,14 @@ export default function LoginPage() {
                 {loading ? "Sedang login..." : "Login"}
               </button>
             </form>
+
+            <button
+              type="button"
+              onClick={handleGuestLogin}
+              className="mt-3 w-full rounded-xl border border-[#003f52]/25 px-6 py-3.5 font-semibold text-[#003f52] transition hover:border-[#003f52] hover:bg-[#003f52]/5 focus:outline-none focus:ring-4 focus:ring-[#003f52]/20"
+            >
+              Lanjut sebagai Guest
+            </button>
 
             <p className="mt-7 text-center text-sm text-gray-500">
               Belum punya akun?{" "}

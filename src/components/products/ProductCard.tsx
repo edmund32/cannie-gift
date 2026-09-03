@@ -1,4 +1,5 @@
 import type { Product } from "@/types/product";
+import Image from "next/image";
 import Link from "next/link";
 
 type ProductCardProps = {
@@ -11,9 +12,11 @@ export default function ProductCard({
   return (
     <article className="group overflow-hidden rounded-2xl border border-[#d4af37]/30 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#d4af37] hover:shadow-lg">
       {/* Gambar produk */}
-      <img
+      <Image
         src={product.image_url}
         alt={product.name}
+        width={640}
+        height={480}
         className="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
       />
 

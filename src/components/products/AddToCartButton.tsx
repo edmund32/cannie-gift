@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { getCustomerByUserId } from "@/services/customerService";
+import { getOrCreateCustomerProfile } from "@/services/customerService";
 import { addToCart } from "@/services/cartService";
 import { addGuestCartItem } from "@/services/guestCartService";
 
@@ -31,12 +31,7 @@ export default function AddToCartButton({
       }
 
       // Cari customer berdasarkan user.id.
-      const customer = await getCustomerByUserId(user.id);
-
-      if (!customer) {
-        alert("Customer profile tidak ditemukan.");
-        return;
-      }
+      const customer = await getOrCreateCustomerProfile(user);
 
       // Tambahkan produk ke cart.
       await addToCart(customer.id, productId);

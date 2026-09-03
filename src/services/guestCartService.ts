@@ -43,3 +43,7 @@ export function updateGuestCartItem(productId: string, quantity: number) {
 export function removeGuestCartItem(productId: string) {
   saveGuestCart(getGuestCart().filter((item) => item.productId !== productId));
 }
+
+export function clearGuestCart() {
+  saveGuestCart([]);
+}

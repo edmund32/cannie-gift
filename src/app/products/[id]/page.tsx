@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { getProductById } from "../../../services/productService";
 import AddToCartButton from "../../../components/products/AddToCartButton";
@@ -12,6 +14,8 @@ type ProductDetailPageProps = {
 export default async function ProductDetailPage({
   params,
 }: ProductDetailPageProps) {
+  await connection();
+
   // Mengambil ID produk dari URL.
   const { id } = await params;
 
@@ -37,9 +41,11 @@ export default async function ProductDetailPage({
       <div className="grid gap-8 md:grid-cols-2">
         {/* Gambar produk */}
         <div className="overflow-hidden rounded-xl">
-          <img
+          <Image
             src={product.image_url}
             alt={product.name}
+            width={800}
+            height={800}
             className="h-full max-h-[500px] w-full object-cover"
           />
         </div>

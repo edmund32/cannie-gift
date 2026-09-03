@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
+import { createCustomerProfile } from "../../services/customerService";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function RegisterPage() {
 
     // Membuat akun di Supabase Auth.
     // Data customer disimpan sementara di user metadata.
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -42,6 +43,24 @@ export default function RegisterPage() {
       setError(error.message);
       setLoading(false);
       return;
+    }
+
+    // Jika konfirmasi email tidak diwajibkan, session tersedia dan profil
+    // customer dapat dibuat langsung setelah akun Auth berhasil dibuat.
+    if (data.user && data.session) {
+      try {
+        await createCustomerProfile(data.user.id, {
+          name,
+          phone,
+          email,
+          address,
+        });
+      } catch (profileError) {
+        console.error("Gagal membuat customer profile:", profileError);
+        setError("Akun berhasil dibuat, tetapi profil customer belum tersimpan.");
+        setLoading(false);
+        return;
+      }
     }
 
     // Karena Confirm Email aktif,

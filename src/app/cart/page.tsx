@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { supabase } from "../../lib/supabase";
-import { getCustomerByUserId } from "../../services/customerService";
+import { getOrCreateCustomerProfile } from "../../services/customerService";
 import { getProductById } from "../../services/productService";
 import {
   getCartItems,
@@ -56,12 +57,7 @@ export default function CartPage() {
         }
 
         // 2. Cari customer berdasarkan user.id.
-        const customer = await getCustomerByUserId(user.id);
-
-        if (!customer) {
-          console.error("Customer profile tidak ditemukan.");
-          return;
-        }
+        const customer = await getOrCreateCustomerProfile(user);
 
         // 3. Ambil isi cart.
         const items = await getCartItems(customer.id);
@@ -100,7 +96,7 @@ export default function CartPage() {
 
     await updateCartItemQuantity(cartItemId, newQuantity);
 
-    const customer = await getCustomerByUserId(user.id);
+    const customer = await getOrCreateCustomerProfile(user);
 
     if (!customer) {
       return;
@@ -143,16 +139,18 @@ export default function CartPage() {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-10">
-        <p>Memuat keranjang...</p>
+      <main className="flex-1 bg-[#fffaf0] px-6 py-12">
+        <div className="mx-auto max-w-6xl animate-pulse rounded-2xl bg-white p-8 text-gray-400 shadow-sm">
+          Memuat keranjang...
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10">
+    <main className="flex-1 bg-[#fffaf0] px-6 py-10 sm:py-14">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mx-auto mb-8 max-w-6xl">
         <Link
           href="/products"
             className="text-sm text-gray-600 hover:text-[#003f52]"
@@ -160,15 +158,15 @@ export default function CartPage() {
           ← Kembali ke Produk
         </Link>
 
-        <h1 className="mt-4 text-3xl font-bold">
+        <h1 className="mt-4 text-4xl font-bold tracking-tight text-[#003f52]">
           Keranjang Saya
         </h1>
       </div>
 
       {/* Cart kosong */}
       {cartItems.length === 0 ? (
-        <div className="rounded-xl border p-8 text-center">
-          <p className="text-gray-500">
+        <div className="mx-auto max-w-6xl rounded-3xl border border-[#d4af37]/25 bg-white p-10 text-center shadow-sm">
+          <p className="text-lg font-semibold text-[#003f52]">
             Keranjang kamu masih kosong.
           </p>
 
@@ -180,15 +178,28 @@ export default function CartPage() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
+          <div className="space-y-4">
           {cartItems.map((item) => (
             <div
               key={item.id}
-              className="flex gap-4 rounded-xl border p-4"
+              className="flex gap-4 rounded-2xl border border-[#d4af37]/20 bg-white p-4 shadow-sm sm:gap-6 sm:p-5"
             >
+              <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-[#fffaf0] sm:h-36 sm:w-36">
+                {item.products?.image_url && (
+                  <Image
+                    src={item.products.image_url}
+                    alt={item.products.name}
+                    fill
+                    sizes="(max-width: 640px) 112px, 144px"
+                    className="object-cover"
+                  />
+                )}
+              </div>
+
               {/* Informasi produk */}
               <div className="flex-1">
-                <h2 className="text-lg font-semibold">
+                <h2 className="text-lg font-bold text-[#003f52] sm:text-xl">
                   {item.products?.name}
                 </h2>
 
@@ -241,11 +252,24 @@ export default function CartPage() {
               </div>
             </div>
           ))}
+          </div>
 
-          <div className="rounded-xl border bg-gray-50 p-4 text-right">
-            <p className="text-lg font-bold">
+          <div className="rounded-2xl border border-[#d4af37]/25 bg-white p-6 shadow-sm lg:sticky lg:top-24">
+            <p className="text-sm font-medium uppercase tracking-wider text-gray-500">Ringkasan belanja</p>
+            <p className="mt-5 flex items-center justify-between border-b border-gray-100 pb-4 text-sm text-gray-600">
+              <span>{cartItems.length} item</span>
+              <span>Belum termasuk ongkir</span>
+            </p>
+            <p className="mt-4 flex items-center justify-between text-lg font-bold text-[#003f52]">
+              <span>Total</span>
               Total: Rp {totalPrice.toLocaleString("id-ID")}
             </p>
+            <Link
+              href="/checkout"
+              className="mt-6 block w-full rounded-xl bg-[#003f52] px-5 py-3.5 text-center font-semibold text-white transition hover:bg-[#00566d]"
+            >
+              Lanjut Checkout
+            </Link>
           </div>
         </div>
       )}

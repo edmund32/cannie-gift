@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import type { GuestCartItem } from "@/services/guestCartService";
 
 type CartProduct = {
   id: string;
@@ -200,6 +201,48 @@ export async function updateCartItemQuantity(
 }
 
 /**
+ * Menggabungkan cart guest ke cart user setelah login.
+ * Item dengan produk yang sama dijumlahkan, bukan dibuat duplikat.
+ */
+export async function mergeGuestCart(
+  customerId: string,
+  guestItems: GuestCartItem[]
+) {
+  if (guestItems.length === 0) return;
+
+  const cart = await getOrCreateCart(customerId);
+
+  for (const guestItem of guestItems) {
+    const { data: existingItem, error: findError } = await supabase
+      .from("cart_items")
+      .select("id, quantity")
+      .eq("cart_id", cart.id)
+      .eq("product_id", guestItem.productId)
+      .maybeSingle();
+
+    if (findError) throw new Error(findError.message);
+
+    if (existingItem) {
+      const { error } = await supabase
+        .from("cart_items")
+        .update({ quantity: existingItem.quantity + guestItem.quantity })
+        .eq("id", existingItem.id);
+
+      if (error) throw new Error(error.message);
+      continue;
+    }
+
+    const { error } = await supabase.from("cart_items").insert({
+      cart_id: cart.id,
+      product_id: guestItem.productId,
+      quantity: guestItem.quantity,
+    });
+
+    if (error) throw new Error(error.message);
+  }
+}
+
+/**
  * Menghapus sebuah item dari cart.
  */
 export async function removeCartItem(cartItemId: string) {
@@ -211,4 +254,22 @@ export async function removeCartItem(cartItemId: string) {
   if (error) {
     throw new Error(error.message);
   }
+}
+
+export async function clearCart(customerId: string) {
+  const { data: cart, error: cartError } = await supabase
+    .from("carts")
+    .select("id")
+    .eq("customer_id", customerId)
+    .maybeSingle();
+
+  if (cartError) throw new Error(cartError.message);
+  if (!cart) return;
+
+  const { error } = await supabase
+    .from("cart_items")
+    .delete()
+    .eq("cart_id", cart.id);
+
+  if (error) throw new Error(error.message);
 }

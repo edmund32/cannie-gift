@@ -1,8 +1,13 @@
+import { connection } from "next/server";
 import ProductCatalog from "../../components/products/ProductCatalog";
 import { getCategories } from "../../services/categoryService";
 import { getProducts } from "../../services/productService";
 
 export default async function ProductsPage() {
+  // Produk dan kategori diambil saat request agar build tidak bergantung pada
+  // koneksi Supabase yang tersedia pada saat proses build.
+  await connection();
+
   // Mengambil products dan categories dari Supabase secara bersamaan.
   const [products, categories] = await Promise.all([
     getProducts(),
