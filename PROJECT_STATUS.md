@@ -194,7 +194,7 @@ Before continuing work:
      - **Tagline:** *"Rangkai Cinta, Satukan Rasa."*
    - Embedded footer into landing page (`/products`) and catalog page (`/catalog`).
 7. **Deployment Readiness & Root Route:**
-   - Updated `src/app/page.tsx` to redirect directly to `/products`.
+   - Updated `src/app/page.tsx` to redirect directly to `/login` so the login page opens immediately when visiting the root domain, while preserving the guest shopping option ("Lanjut Belanja sebagai Guest").
    - Made Supabase hostname parsing in `next.config.ts` resilient with fallback for zero-downtime Vercel deployment.
 
 **Verification**
