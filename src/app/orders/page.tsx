@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { getOrCreateCustomerProfile } from "@/services/customerService";
 import { cancelCustomerOrder, getCustomerOrders } from "@/services/orderService";
+import { useToast } from "@/components/ui/ToastProvider";
 
 type Order = {
   id: string;
@@ -23,6 +24,7 @@ export default function OrdersPage() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { toast, confirm } = useToast();
 
   useEffect(() => {
     async function loadOrders() {
@@ -40,25 +42,27 @@ export default function OrdersPage() {
       } catch (loadError) {
         console.error("Gagal memuat riwayat pesanan:", loadError);
         setError("Riwayat pesanan belum dapat dimuat.");
+        toast("Riwayat pesanan belum dapat dimuat.", "error");
       } finally {
         setLoading(false);
       }
     }
 
     loadOrders();
-  }, [router]);
+  }, [router, toast]);
 
   async function handleCancel(orderId: string) {
-    if (!customerId || !window.confirm("Batalkan pesanan ini?")) return;
+    if (!customerId || !(await confirm("Batalkan pesanan ini?"))) return;
 
     try {
       await cancelCustomerOrder(orderId, customerId);
       setOrders((currentOrders) => currentOrders.map((order) =>
         order.id === orderId ? { ...order, order_status: "cancelled" } : order
       ));
+      toast("Pesanan berhasil dibatalkan.", "success");
     } catch (cancelError) {
       console.error("Gagal membatalkan pesanan:", cancelError);
-      setError("Pesanan tidak dapat dibatalkan. Mungkin sudah diproses.");
+      toast("Pesanan tidak dapat dibatalkan. Mungkin sudah diproses.", "error");
     }
   }
 
@@ -74,7 +78,6 @@ export default function OrdersPage() {
         <p className="mt-2 text-gray-600">Lihat status dan detail pesananmu.</p>
 
         {loading && <div className="mt-8 rounded-2xl bg-white p-8 text-gray-600 shadow-sm">Memuat riwayat pesanan...</div>}
-        {error && <p role="alert" className="mt-8 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</p>}
         {!loading && !error && orders.length === 0 && (
           <div className="mt-8 rounded-2xl border border-[#d4af37]/25 bg-white p-10 text-center shadow-sm">
             <p className="font-semibold text-[#003f52]">Belum ada pesanan.</p>

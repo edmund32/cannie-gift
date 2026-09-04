@@ -16,62 +16,71 @@ export default function ProductCatalog({
 }: ProductCatalogProps) {
   // Menyimpan kategori yang sedang dipilih.
   // null berarti menampilkan semua produk.
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    null
-  );
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Filter produk berdasarkan kategori yang dipilih.
   const filteredProducts =
     selectedCategory === null
       ? products
-      : products.filter(
-          (product) => product.category_id === selectedCategory
-        );
+      : products.filter((product) => product.category_id === selectedCategory);
 
   return (
     <div>
       {/* Tombol filter kategori */}
-      <div className="mb-8 flex flex-wrap gap-2">
+      <div className="mb-8 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
         <button
           type="button"
           onClick={() => setSelectedCategory(null)}
-          className={`rounded-full px-4 py-2 text-sm transition ${
+          className={`rounded-full px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition ${
             selectedCategory === null
-              ? "bg-[#003f52] text-white hover:-translate-y-0.5 hover:bg-[#00566d] hover:shadow-md"
-              : "border border-[#d4af37]/50 bg-white text-gray-700 hover:-translate-y-0.5 hover:border-[#d4af37] hover:bg-[#fffaf0] hover:shadow-md"
+              ? "bg-[#003f52] text-white shadow-md shadow-[#003f52]/20"
+              : "border border-gray-200 bg-white text-gray-600 hover:border-[#d4af37] hover:bg-[#fffaf0] hover:text-[#003f52]"
           }`}
         >
-          All
+          Semua ({products.length})
         </button>
 
-        {categories.map((category) => (
-          <button
-            key={category.id}
-            type="button"
-            onClick={() => setSelectedCategory(category.id)}
-            className={`rounded-full px-4 py-2 text-sm transition ${
-              selectedCategory === category.id
-                ? "bg-[#003f52] text-white hover:-translate-y-0.5 hover:bg-[#00566d] hover:shadow-md"
-                : "border border-[#d4af37]/50 bg-white text-gray-700 hover:-translate-y-0.5 hover:border-[#d4af37] hover:bg-[#fffaf0] hover:shadow-md"
-            }`}
-          >
-            {category.name}
-          </button>
-        ))}
+        {categories.map((category) => {
+          const count = products.filter((p) => p.category_id === category.id).length;
+          return (
+            <button
+              key={category.id}
+              type="button"
+              onClick={() => setSelectedCategory(category.id)}
+              className={`rounded-full px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition ${
+                selectedCategory === category.id
+                  ? "bg-[#003f52] text-white shadow-md shadow-[#003f52]/20"
+                  : "border border-gray-200 bg-white text-gray-600 hover:border-[#d4af37] hover:bg-[#fffaf0] hover:text-[#003f52]"
+              }`}
+            >
+              {category.name} ({count})
+            </button>
+          );
+        })}
       </div>
 
       {/* Product list */}
       {filteredProducts.length === 0 ? (
-        <p className="text-gray-500">
-          Tidak ada produk pada kategori ini.
-        </p>
+        <div className="rounded-3xl border border-dashed border-[#d4af37]/40 bg-white/70 p-12 text-center">
+          <span className="text-4xl">🌸</span>
+          <h4 className="mt-3 text-base font-bold text-[#003f52]">
+            Belum ada produk di kategori ini
+          </h4>
+          <p className="mt-1 text-sm text-gray-500">
+            Silakan pilih kategori lain atau lihat seluruh koleksi bouquet kami.
+          </p>
+          <button
+            type="button"
+            onClick={() => setSelectedCategory(null)}
+            className="mt-4 inline-block rounded-xl bg-[#003f52] px-5 py-2 text-xs font-semibold text-white transition hover:bg-[#00526b]"
+          >
+            Lihat Semua Produk
+          </button>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
           {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}

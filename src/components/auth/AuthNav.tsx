@@ -98,36 +98,105 @@ export default function AuthNav() {
   }
 
   return (
-    <header className="sticky top-0 z-10 border-b border-[#d4af37]/30 bg-[#003f52]/95 text-white backdrop-blur">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/products" className="transition hover:scale-[1.02]">
-          <Image src="/Cannie.png" alt="Cannie Gift and Florist" width={64} height={64} className="h-12 w-12 object-cover" />
+    <header className="sticky top-0 z-20 border-b border-[#d4af37]/25 bg-[#003f52]/95 text-white shadow-sm backdrop-blur-md">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
+        {/* Brand Logo & Name */}
+        <Link href="/products" className="group flex items-center gap-3 transition">
+          <div className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-[#d4af37]/60 bg-white p-0.5 shadow-sm transition group-hover:scale-105 sm:h-11 sm:w-11">
+            <Image
+              src="/Cannie.png"
+              alt="Cannie Gift"
+              fill
+              sizes="44px"
+              className="object-cover rounded-full"
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-base font-bold tracking-tight text-white transition group-hover:text-[#d4af37] leading-tight">
+              Cannie Gift
+            </span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-[#d4af37]">
+              Since 2020
+            </span>
+          </div>
         </Link>
 
+        {/* Center Main Nav (Only on non-auth pages) */}
+        {!isAuthPage && (
+          <div className="hidden items-center gap-1.5 md:flex">
+            <Link
+              href="/products"
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold tracking-wide transition ${
+                pathname === "/products"
+                  ? "bg-white/15 text-[#d4af37] shadow-2xs"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              Beranda
+            </Link>
+            <Link
+              href="/catalog"
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold tracking-wide transition ${
+                pathname === "/catalog" || pathname.startsWith("/products/")
+                  ? "bg-white/15 text-[#d4af37] shadow-2xs"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              Katalog Bouquet
+            </Link>
+          </div>
+        )}
+
+        {/* Right Actions: Cart, Orders, Auth */}
         {loading ? (
-          <span className="text-sm text-gray-400">Memuat...</span>
+          <div className="flex items-center gap-2">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#d4af37] border-t-transparent" />
+            <span className="text-xs text-white/60">Memuat...</span>
+          </div>
         ) : user ? (
-          <div className="flex items-center gap-4">
-            <Link
-              href="/cart"
-              className={`text-sm text-white/80 transition hover:text-[#d4af37] ${isAdmin ? "hidden" : ""}`}
-            >
-              Keranjang
-            </Link>
-            <Link
-              href="/orders"
-              className={`text-sm text-white/80 transition hover:text-[#d4af37] ${isAdmin ? "hidden" : ""}`}
-            >
-              Pesanan
-            </Link>
+          <div className="flex items-center gap-3 text-xs sm:gap-4">
+            {/* Cart Link (Hidden on auth page and for admin) */}
+            {!isAuthPage && !isAdmin && (
+              <Link
+                href="/cart"
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 font-semibold transition ${
+                  pathname === "/cart"
+                    ? "bg-[#d4af37] text-[#003f52] font-bold shadow-xs"
+                    : "bg-white/10 text-white hover:bg-white/20"
+                }`}
+                title="Keranjang Belanja"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span className="hidden sm:inline">Keranjang</span>
+              </Link>
+            )}
+
+            {!isAuthPage && !isAdmin && (
+              <Link
+                href="/orders"
+                className={`rounded-xl px-2.5 py-1.5 font-semibold transition ${
+                  pathname === "/orders"
+                    ? "text-[#d4af37]"
+                    : "text-white/80 hover:text-[#d4af37]"
+                }`}
+              >
+                Pesanan
+              </Link>
+            )}
+
             {isAdmin && (
-              <Link href={pathname === "/admin" ? "/products" : "/admin"} className="text-sm text-white/80 transition hover:text-[#d4af37]">
-                {pathname === "/admin" ? "← Products" : "Admin"}
+              <Link
+                href={pathname === "/admin" ? "/products" : "/admin"}
+                className="rounded-xl border border-[#d4af37] bg-[#d4af37]/20 px-3 py-1 font-bold text-[#d4af37] transition hover:bg-[#d4af37] hover:text-[#003f52]"
+              >
+                {pathname === "/admin" ? "← Ke Toko" : "Admin Panel"}
               </Link>
             )}
 
             {!isAuthPage && (
-              <span className="hidden text-sm text-white/75 sm:inline">
+              <span className="hidden max-w-[140px] truncate text-white/70 lg:inline" title={user.email ?? ""}>
                 {user.email}
               </span>
             )}
@@ -136,30 +205,44 @@ export default function AuthNav() {
               type="button"
               onClick={handleLogout}
               disabled={loggingOut}
-              className="rounded-lg border border-[#d4af37]/60 px-3 py-2 text-sm transition hover:bg-[#d4af37] hover:text-[#003f52] disabled:opacity-50"
+              className="rounded-xl border border-white/25 px-3 py-1.5 font-medium text-white/80 transition hover:border-[#d4af37] hover:bg-white/10 hover:text-[#d4af37] disabled:opacity-50"
             >
-              {loggingOut ? "Logout..." : "Logout"}
+              {loggingOut ? "..." : "Logout"}
             </button>
           </div>
-        ) : (
-          <div className="flex items-center gap-4 text-sm">
+        ) : !isAuthPage ? (
+          <div className="flex items-center gap-2.5 text-xs sm:gap-3">
+            {/* Cart Link for Guests */}
             <Link
               href="/cart"
-              className="text-white/80 transition hover:text-[#d4af37]"
+              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 font-semibold transition ${
+                pathname === "/cart"
+                  ? "bg-[#d4af37] text-[#003f52] font-bold shadow-xs"
+                  : "bg-white/10 text-white hover:bg-white/20"
+              }`}
+              title="Keranjang Belanja"
             >
-              Keranjang
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span className="hidden sm:inline">Keranjang</span>
             </Link>
-            <Link href="/login" className="hover:text-[#d4af37]">
+
+            <Link
+              href="/login"
+              className="px-2 py-1.5 font-semibold text-white/85 transition hover:text-[#d4af37]"
+            >
               Login
             </Link>
+
             <Link
               href="/register"
-              className="rounded-lg bg-[#d4af37] px-3 py-2 text-[#003f52] transition hover:bg-[#e3c354]"
+              className="rounded-xl bg-[#d4af37] px-3.5 py-1.5 font-bold text-[#003f52] shadow-xs transition hover:bg-[#e3c354] hover:shadow-md"
             >
               Register
             </Link>
           </div>
-        )}
+        ) : null}
       </nav>
     </header>
   );

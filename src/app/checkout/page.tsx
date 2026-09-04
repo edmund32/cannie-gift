@@ -12,6 +12,7 @@ import {
 } from "@/services/customerService";
 import { createOrder } from "@/services/orderService";
 import { clearGuestCart, getGuestCart } from "@/services/guestCartService";
+import { useToast } from "@/components/ui/ToastProvider";
 
 type CheckoutItem = {
   id: string;
@@ -36,7 +37,8 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     async function loadCheckout() {
@@ -77,13 +79,14 @@ export default function CheckoutPage() {
       } catch (loadError) {
         console.error("Gagal memuat checkout:", loadError);
         setError("Data checkout tidak dapat dimuat.");
+        toast("Data checkout tidak dapat dimuat.", "error");
       } finally {
         setLoading(false);
       }
     }
 
     loadCheckout();
-  }, []);
+  }, [toast]);
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -126,6 +129,7 @@ export default function CheckoutPage() {
     } catch (submitError) {
       console.error("Gagal membuat order:", submitError);
       setError("Order belum berhasil dibuat. Silakan coba lagi.");
+      toast("Order belum berhasil dibuat. Silakan coba lagi.", "error");
       setSubmitting(false);
     }
   }
@@ -157,7 +161,6 @@ export default function CheckoutPage() {
             </div>
             <label className="mt-5 block text-sm font-semibold text-gray-700">Alamat pengiriman<textarea required rows={4} value={address} onChange={(e) => setAddress(e.target.value)} className="mt-2 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#003f52]" /></label>
             <label className="mt-5 block text-sm font-semibold text-gray-700">Catatan <span className="font-normal text-gray-500">(opsional)</span><textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-2 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#003f52]" /></label>
-            {error && <p role="alert" className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
           </section>
 
           <aside className="h-fit rounded-2xl border border-[#d4af37]/25 bg-white p-6 shadow-sm lg:sticky lg:top-24">
